@@ -100,14 +100,6 @@ Handler的工作机制简单来说是这样的
 2、Looper不断轮询调用MeaasgaQueue的next方法  
 
 3、如果发现message就调用handler的dispatchMessage，ldispatchMessage被成功调用，接着调用handlerMessage()  
-
-Handler的工作机制简单来说是这样的
-
-1、Handler发送消息仅仅是调用MessageQueue的enqueueMessage向插入一条信息到MessageQueue
-
-2、Looper不断轮询调用MeaasgaQueue的next方法
-
-3、如果发现message就调用handler的dispatchMessage，ldispatchMessage被成功调用，接着调用handlerMessage()
    
 ---  
 
