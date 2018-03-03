@@ -50,3 +50,8 @@ ThreadLocal是一个线程内部的数据存储类，通过它可以在指定的
   
 ![](https://i.imgur.com/WQJPltE.jpg)  
   
+### 主线程的消息循环  
+  
+![](https://i.imgur.com/0Ax9QX4.jpg)  
+  
+![](https://i.imgur.com/8ZMei1h.jpg)
