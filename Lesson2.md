@@ -1,96 +1,67 @@
 # Android 开发艺术探索  
 ---
-## 第二章  
-### Android IPC简介  
+  
+## Android IPC简介  
+
 * IPC是Inter-Process Communication的缩写，含义：进程间通信，指两个进程之间进行数据交换的过程。  
 * 线程是CPU调度的最小单元，同时线程是一种有限资源系统资源。  
 * 进程一般指一个执行单元，在PC和移动设备上指一个程序或者一个应用。  
-<center>__一个进程可以包含多个线程，也可以只有一个线程，即主线程，在Android里面主线程也叫UI线程。__</center>  
+**一个进程可以包含多个线程，也可以只有一个线程，即主线程，在Android里面主线程也叫UI线程。**
 * __ANR__:Application Not Responding,即应用无响应。  
+    
+在Android中使用多进程只有一种方法，那就是给四大组件（Activity、Service、Receiver、ContentProvider）中指定android:process属性。另一种不常用的是通过JNI在native层去fork一个新的进程。    
+
+进程名以“：”开头的进程属于当前应用的**私有进程**，其他应用的组件不可以和它跑在同一个进程中，而进程名不以“：”开始的属于**全局进程**，其他应用通过ShareUID方式可以和它跑在同一个进程中。     
+    
+我们可以通过shell来查看进程信息：  
   
-在Android中使用多进程只有一种方法，那就是给四大组件（Activity、Service、Receiver、ContentProvider）中指定android:process属性。另一种不常用的是通过JNI在native层去fork一个新的进程。  
-进程名以“：”开头的进程属于当前应用的私有进程，其他应用的组件不可以和它跑在同一个进程中，而进程名不以“：”开始的属于全局进程，其他应用通过ShareUID方式可以和它跑在同一个进程中。  
-##### 一般来说，多进程会造成如下几个方面的问题  
+	adb shell ps | grep com.ybw.app
+
+### 一般来说，多进程会造成如下几个方面的问题  
 * 静态成员和单例模式完全失效  
 * 线程同步机制完全失效  
 * SharePreferences的可靠性下降。  
 * Application会多次创建  
-因为不是同一块内存，所以不管是锁对象还是锁全局类都无法保证线程同步，SharePreferences不支持两个进程同时去执行写操作，会导致一定几率数据丢失，这是因为SharePreferences底层是通过读/写XML文件来实现的，并发写显然是会出问题的。  
-##### 跨进程通信方式：   
+因为不是同一块内存，所以不管是锁对象还是锁全局类都无法保证线程同步，SharePreferences不支持两个进程同时去执行写操作，会导致一定几率数据丢失，这是因为SharePreferences底层是通过读/写XML文件来实现的，并发写显然是会出问题的。    
+    
+
+### 跨进程通信方式：   
 * Intent传递消息  
 * 共享文件  
 * SharePreferences  
 * 基于Binder的Messenger  
-* AIDL及Socket  
-##### Serializable接口  
+* AIDL及Socket    
+
+---  
+
+### Serializable接口   
+
 Serializable是Java所提供的一个序列化接口，它是一个空接口，为对象提供标准的序列化和反序列化操作。操作方法只需该类实现Serializable接口并声明一个SerialVersionUID,如下则是自动序列化过程：  
 
-    private static final long serialVersionUID = 6587943156456215786L  
-##### 序列化：将对象的状态信息转换为可以存储或传输的形式的过程。在序列化期间，对象将其当前状态写入到临时或持久性存储区。以后可以通过从存储区中读取或反序列化对象的状态，重新创建该对象。  
-_对于任何可能包含重要的安全性数据的对象，如果可能，应该使该对象不可序列化。如果它必须为可序列化的，请尝试生成特定字段来保存不可序列化的重要数据。如果无法实现这一点，则应注意该数据会被公开给任何拥有序列化权限的代码，并确保不让任何恶意代码获得该权限。_  
+    private static final long serialVersionUID = 6587943156456215786L      
   
-##### Parcelable接口  
-Parcelable是Android中的序列化方式，更适合在Android平台上。效率高，但过程麻烦。  
+![](https://i.imgur.com/kQJeS2A.jpg)
 
-由于不同的进程有着不同的内存区域，并且它们只能访问自己的那一块内存区域，所以我们不能像平时那样，传一个句柄过去就完事了——句柄指向的是一个内存区域，现在目标进程根本不能访问源进程的内存，那把它传过去又有什么用呢？所以我们必须将要传输的数据转化为能够在内存之间流通的形式。这个转化的过程就叫做序列化与反序列化。  
+**序列化：将对象的状态信息转换为可以存储或传输的形式的过程。在序列化期间，对象将其当前状态写入到临时或持久性存储区。以后可以通过从存储区中读取或反序列化对象的状态，重新创建该对象。**  
+_对于任何可能包含重要的安全性数据的对象，如果可能，应该使该对象不可序列化。如果它必须为可序列化的，请尝试生成特定字段来保存不可序列化的重要数据。如果无法实现这一点，则应注意该数据会被公开给任何拥有序列化权限的代码，并确保不让任何恶意代码获得该权限。_       
 
->实现 Parcelable 接口  
+---
+  
+### Parcelable接口  
+Parcelable是一个接口，只要实现这个接口，一个类的对象就可以实现序列化并可以通过Intent和Binder传递。   
 
-* 创建一个类，正常的书写其成员变量，建立getter和setter，然后 implements Parcelable；默认生成的类里面只有 writeToParcel() 方法，该方法的对象只支持为 in 的定向 tag  。  
-
-*那么这个 readFromParcel() 方法应当怎么写呢？这样写：*  
-<pre><code>@Override
-public void writeToParcel(Parcel dest, int flags) {
-    dest.writeString(name);
-    dest.writeInt(price);
-}
-
-/**
- * 参数是一个Parcel,用它来存储与传输数据
- * @param dest
- */
-public void readFromParcel(Parcel dest) {
-    //注意，此处的读值顺序应当是和writeToParcel()方法中一致的
-    name = dest.readString();
-    price = dest.readInt();
-}</code></pre>
+由于不同的进程有着不同的内存区域，并且它们只能访问自己的那一块内存区域，所以我们不能像平时那样，传一个句柄过去就完事了——句柄指向的是一个内存区域，现在目标进程根本不能访问源进程的内存，那把它传过去又有什么用呢？所以我们必须将要传输的数据转化为能够在内存之间流通的形式。这个转化的过程就叫做序列化与反序列化。   
+  
+Parcelable主要用在内存序列化上，通过Parcelable将对象序列化到存储设备中或者将对象序列化后通过网络传输也都是可以的，但过程稍微复杂，建议使用Serializable  
 
 ---
 
-##### Binder类  
+### Binder类  
 * Binder是Android中的一个类，它实现了IBinder接口。
 * 从IPC角度来说，Binder是Android中的一种跨进程通信方式  
 * 从AndroidFramework角度来说，Binder是ServiceManager连接各种Manager(ActivityManager、windowManager等等)和相应ManagerService的桥梁  
 * 从Android应用层来说，Binder是客户端和服务端进行通信的媒介。  
   
-##### Binder原理  
-  
-Binder通信采用C/S架构，从组件视角来说，包含Client、Server、ServiceManager以及binder驱动，其中ServiceManager用于管理系统中的各种服务。架构图如下所示：  
-  
-![](https://i.imgur.com/b835rt5.jpg)  
-  
-**Binder通信的四个角色**  
-**Client进程**：使用服务的进程。
-
-**Server进程**：提供服务的进程。
-
-**ServiceManager进程**：ServiceManager的作用是将字符形式的Binder名字转化成Client中对该Binder的引用，使得Client能够通过Binder名字获得对Server中Binder实体的引用。
-
-**Binder驱动**：驱动负责进程之间Binder通信的建立，Binder在进程之间的传递，Binder引用计数管理，数据包在进程之间的传递和交互等一系列底层支持。
-
-**Binder运行机制**
-
-图中Client/Server/ServiceManage之间的相互通信都是基于Binder机制。既然基于Binder机制通信，那么同样也是C/S架构，则图中的3大步骤都有相应的Client端与Server端。
-
-**注册服务(addService)**：Server进程要先注册Service到ServiceManager。该过程：Server是客户端，ServiceManager是服务端。
-
-**获取服务(getService)**：Client进程使用某个Service前，须先向ServiceManager中获取相应的Service。该过程：Client是客户端，ServiceManager是服务端。
-
-**使用服务**：Client根据得到的Service信息建立与Service所在的Server进程通信的通路，然后就可以直接与Service交互。该过程：client是客户端，server是服务端。
-
-图中的Client,Server,Service Manager之间交互都是虚线表示，是由于它们彼此之间不是直接交互的，而是都通过与Binder驱动进行交互的，从而实现IPC通信方式。其中Binder驱动位于内核空间，Client,Server,Service Manager位于用户空间。Binder驱动和Service Manager可以看做是Android平台的基础架构，而Client和Server是Android的应用层，开发人员只需自定义实现client、Server端，借助Android的基本平台架构便可以直接进行IPC通信。
-
-
 ---
 
 ##### AIDL
