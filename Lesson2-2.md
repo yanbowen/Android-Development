@@ -40,4 +40,11 @@ Messenger翻译为信使，可以在不同进程中传递Message对象，在Mess
 
 ### 五、使用ContentProvider    
    
-和Messenger一样，ContentProvider的底层实现同样也是Binder。实现自己的ContentProvider需要实现相关的6个方法，onCreate，query，update，insert，delete和getType。
+和Messenger一样，ContentProvider的底层实现同样也是Binder。实现自己的ContentProvider需要实现相关的6个方法，onCreate，query，update，insert，delete和getType。   
+   
+### 六、使用Socket     
+  
+通过Socket来实现进程间的通信。Socket也称为“套接字”，是网络通信中的概念，它分为流式套接字和用户数据报套接字两种，分别对应于网络的传输控制层中的TCP和UDP协议。TCP协议是面向连接的协议，提供稳定的双向通信功能，TCP连接的建立需要经过“三次握手”，为了提供稳定的数据传输功能，其本身提供了超时重传机制，因此具有很高的稳定性；而UDP是无连接的，提供不稳定的单向通信功能。   
+   
+![](https://i.imgur.com/w0r1cdq.jpg)   
+   
