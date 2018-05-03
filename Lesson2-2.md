@@ -36,7 +36,9 @@ Messenger翻译为信使，可以在不同进程中传递Message对象，在Mess
 	* 服务端首先要创建一个Service用来监听客户端的连接请求，然后创建一个AIDL文件，将暴露给客户端的接口在这个AIDL文件中声明，最后在Service中实现这个AIDL接口即可。
 
 2. 客户端  
-	* 首先绑定服务端的Service，绑定成功后，将服务端返回的Binder对象转化成AIDL接口所属的类型，接着就可以调用AIDL中的方法了。    
+	* 首先绑定服务端的Service，绑定成功后，将服务端返回的Binder对象转化成AIDL接口所属的类型，接着就可以调用AIDL中的方法了。      
+
+
 
 ### 五、使用ContentProvider    
    

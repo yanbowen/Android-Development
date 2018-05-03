@@ -37,11 +37,6 @@ ListView在加载子项视图的时候，先判断是否有子元素、RecycleBi
 [https://blog.csdn.net/songtangxue/article/details/79094413](https://blog.csdn.net/songtangxue/article/details/79094413 "Android动画总结")
   
 ### 一、概述  
-动画的概念   
-
-* 动画的概念不同于一般意义上的动画片，动画是一种综合艺术，它是集合了绘画、漫画、电影、数字媒体、摄影、音乐、文学等众多艺术门类于一身的艺术表现形式。   
-* 动画的英文有很多表述，如animation、cartoon、animated cartoon、cameracature。其中较正式的 “Animation” 一词源自于拉丁文字根anima，意思为“灵魂”，动词animate是“赋予生命”的意思，引申为使某物活起来的意思。所以动画可以定义为使用绘画的手法，创造生命运动的艺术。 
-* 动画技术较规范的定义是采用逐帧拍摄对象并连续播放而形成运动的影像技术。不论拍摄对象是什么，只要它的拍摄方式是采用的逐格方式，观看时连续播放形成了活动影像，它就是动画。
 
 Android系统中的动画   
 
@@ -107,77 +102,8 @@ Android系统中的动画
    
 java代码很简单，导入动画开始动画，三行代码就可。大家可以看到我的mImgvOne是一个SimpleDraweeView，因为现在很多人使用Fresco，我只是想证明在使用动画时SimpleDraweeView的用法和ImageView一样，大家不必担心用了Fresco就没法玩动画了。而且基于Fresco的强大基因，想要实现帧动画？人家Fresco是支持gif图的，直接往里面放一个gif图，比我们设置帧动画简单多了。    
   
-下面我们再看看AnimationDrawable这个类，我们在执行帧动画时要依靠AnimationDrawable的start方法，先上源码分析一下：   
    
-	public class AnimationDrawable extends DrawableContainer implements Runnable, Animatable {
-    	public AnimationDrawable() {
-    	    throw new RuntimeException("Stub!");
-    	}
-
-    	public boolean setVisible(boolean visible, boolean restart) {
-    	    throw new RuntimeException("Stub!");
-    	}
-
-    	public void start() {
-    	    throw new RuntimeException("Stub!");
-    	}
-
-    	public void stop() {
-    	    throw new RuntimeException("Stub!");
-    	}
-
-    	public boolean isRunning() {
-    	    throw new RuntimeException("Stub!");
-    	}
-
-    	public void run() {
-    	    throw new RuntimeException("Stub!");
-    	}
-
-    	public void unscheduleSelf(Runnable what) {
-    	    throw new RuntimeException("Stub!");
-    	}
-
-    	public int getNumberOfFrames() {
-    	    throw new RuntimeException("Stub!");
-    	}
-
-    	public Drawable getFrame(int index) {
-    	    throw new RuntimeException("Stub!");
-    	}
-
-    	public int getDuration(int i) {
-    	    throw new RuntimeException("Stub!");
-    	}
-
-    	public boolean isOneShot() {
-    	    throw new RuntimeException("Stub!");
-    	}
-
-    	public void setOneShot(boolean oneShot) {
-    	    throw new RuntimeException("Stub!");
-    	}
-
-    	public void addFrame(Drawable frame, int duration) {
-    	    throw new RuntimeException("Stub!");
-    	}
-
-    	public void inflate(Resources r, XmlPullParser parser, AttributeSet attrs, Theme theme) throws XmlPullParserException, IOException {
-        throw new RuntimeException("Stub!");
-    	}
-
-    	public Drawable mutate() {
-    	    throw new RuntimeException("Stub!");
-    	}
-
-    	protected void setConstantState(DrawableContainerState state) {
-    	    throw new RuntimeException("Stub!");
-    	}
-	}   
-   
-* 可以看到AnimationDrawable继承了DrawableContainer，而DrawableContainer其实就是Drawable的一个子类，这也是我们animationDrawableTwo = (AnimationDrawable) mImgvTwo.getDrawable();把Drawable强转成AnimationDrawable的原因了。所以AnimationDrawable也是个Drawable罢了。再看它所实现的接口Runnable, Animatable，表明它是一个可执行命令，并且自己支持动画。源码不难，下面简略介绍一下它的相关方法：   
-
-![](https://i.imgur.com/fcVoAsJ.jpg)   
+* 可以看到AnimationDrawable继承了DrawableContainer，而DrawableContainer其实就是Drawable的一个子类，这也是我们animationDrawableTwo = (AnimationDrawable) mImgvTwo.getDrawable();把Drawable强转成AnimationDrawable的原因了。所以AnimationDrawable也是个Drawable罢了。再看它所实现的接口Runnable, Animatable，表明它是一个可执行命令，并且自己支持动画。 
    
 源码解析完了，我们也看到了AnimationDrawable的一些方法。下面我们再看看不通过xml文件，直接在代码中执行帧动画的方法。先上代码：  
    
@@ -189,7 +115,9 @@ java代码很简单，导入动画开始动画，三行代码就可。大家可�
         mImgvOne.setBackground(animationDrawableOne);
         animationDrawableOne.start();   
    
- 同样，使用代码依旧可以做出帧动画的效果，所以大家是使用xml还是代码创建动画，看大家喜好咯。    
+ 同样，使用代码依旧可以做出帧动画的效果，所以大家是使用xml还是代码创建动画，看大家喜好咯。       
+   
+帧动画使用简单，但是比较容易引起OOM，所以在使用帧动画时应尽量避免使用过多尺寸较大的图片。
 
 #### 2. 补间动画（Tween）   
 
@@ -197,3 +125,9 @@ java代码很简单，导入动画开始动画，三行代码就可。大家可�
 
 * 补间动画有四种基本形式，分别是Alpha（透明度），Translate（位移），Scale（缩放），Rotate（旋转）。当然还可以是多种动画效果的组合，例如alpha+translate、alpha+rotate，甚至四种形式组合在一起的动画。同样，和帧动画一样，补间动画的可以以xml的方式实现，也可以以代码的方式实现。    
 
+#### 3. 属性动画   
+  
+然而自Android 3.0版本开始，系统给我们提供了一种全新的动画模式，属性动画(property animation)   
+    
+![](https://i.imgur.com/6dR3lP9.jpg)   
+   
